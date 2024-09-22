@@ -1,0 +1,97 @@
+############################################################################################
+# Musa : Network Deployment
+############################################################################################
+
+name: "Musa Consulting infra Pipeline - ${{parameters.targetEnvironment}}"
+
+parameters:
+  - name: targetEnvironment # The LZ environment to deploy to.
+    type: string
+    default: development
+    values:
+      - development
+      - acceptance
+      - production
+
+variables:
+  - group: GlobalVariables
+  # - ${{ if eq(parameters.targetEnvironment, 'development') }}:
+  #   - group: TeamVars
+  # - ${{ if eq(parameters.targetEnvironment, 'test') }}:
+  #   - group: TeamVars
+
+  # - ${{ if eq(parameters.targetEnvironment, 'acceptance') }}:
+  #   - group: TeamVars
+
+  # - ${{ if eq(parameters.targetEnvironment, 'production') }}:
+  #   - group: TeamVars
+
+  - template: ./bicep/variables/global.variables.yml # Template for global variables
+
+# trigger:
+#   branches:
+#     include:
+#       - main
+
+trigger: none
+
+pool: ${{ global.variables.agentPool }} # Agent pool to use for the pipeline
+
+Stages:
+  - stage: InfraValidation
+
+    variables: # Stage level variables can be defined to access the variables across all the jobs and task inside that specific stage.
+      - template: ./bicep/parameters/${{parameters.targetEnvironment}}.variables.yml
+
+    # Jobs run in parallel by default, this can be changed by adding a condition.
+
+    jobs:
+      # This section is intended for IaC deployments using Bicep and can be removed if you prefer to use ARM.
+
+      ############################################################################################
+      # Bicep Infrastructure Deployment
+      ############################################################################################
+
+      # This job is intended to do Bicep based deployments
+      - job: InfraDeploymentBicep
+        displayName: Infra Deployment Bicep
+        # You can also make use of Azure Devops Environments to set approvals and security, https://learn.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops
+        steps:
+          - checkout: self
+            path: ./s/self
+
+          # Details for the Azure Resource Manager Deployment task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-resource-manager-template-deployment-v3?view=azure-pipelines
+          # The below task allows for scoping and passthrough of output from the deployment task for reuse.
+          - task: AzureResourceManagerTemplateDeployment@3
+            displayName: Deploy Bicep infra template
+            enabled: true
+            name: DeployInfraBicep
+            inputs:
+              action: "Create Or Update Resource Group"
+              azureResourceManagerConnection: "$(GlobalVariables.lib-var-serviceConnection)"
+              csmFile: "${{ variables.pipelineFolderRoot }}/main.infrastructure.bicep"
+              csmParametersFile: "${{ variables.pipelineFolderRoot }}/parameters/parameters.${{ parameters.targetEnvironment }}.json"
+              deploymentMode: "Incremental"
+              deploymentOutputs: "resourceGroupDeploymentOutputs"
+              deploymentScope: "Resource Group"
+              resourceGroupName: "${{ variables.ResourceGroupName }}"
+              location: "$(GlobalVariables.lib-var-location)"
+              subscriptionId: "${{ variables.SubscriptionId }}" # Check!!
+              templateLocation: "Linked artifact"
+              overrideParameters: "-agentPool ${{ global.variables.agentPool}}"
+
+          # Details for a Powershell task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/azure-powershell?view=azure-devops
+          # The below task converts output variables from the Bicep deployment to a key/value array which can be reused in subsequent tasks.
+          - powershell: | # resolve to a PowerShell@2 task
+              if (('$(resourceGroupDeploymentOutputs)').count -eq 0) {
+                Exit 0
+              }
+
+              $outputs = ConvertFrom-Json '$(resourceGroupDeploymentOutputs)'
+              foreach ($output in $outputs.PSObject.Properties) {
+                Write-Host "register RGDO_$($output.Name) = $($output.Value.value)"
+                Write-Host "##vso[task.setvariable variable=RGDO_$($output.Name)]$($output.Value.value)"
+                Write-Host "##vso[task.setvariable variable=RGDO_$($output.Name);isOutput=true]$($output.Value.value)"
+              }
+            displayName: Turn Bicep outputs into variables
+            name: defineVariables

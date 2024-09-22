@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "East US"
+    },
+    "rgName": {
+      "value": "musa01-vnet-d-rg"
+    },
+    "vnetName": {
+      "value": "musa01-d-vnet"
+    },
+    "subnetName": {
+      "value": "ple01-d-subnet"
+    },
+    "nsgName": {
+      "value": "musa01-d-vnet-ple01-subnet-nsg"
+    },
+    "subnetPrefix": {
+      "value": "10.0.1.0/24"
+    },
+    "addressSpace": {
+      "value": "10.0.0.0/16"
+    }
+  }
+}

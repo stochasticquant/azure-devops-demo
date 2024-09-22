@@ -1,0 +1,5 @@
+variables:
+  # Global variables
+  agentPool: "Default"
+  location: "westeurope"
+  pipelineFolderRoot: "src/bicep/"
