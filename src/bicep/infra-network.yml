@@ -37,7 +37,7 @@ trigger: none
 
 pool: ${{ global.variables.agentPool }} # Agent pool to use for the pipeline
 
-Stages:
+stages:
   - stage: InfraValidation
 
     variables: # Stage level variables can be defined to access the variables across all the jobs and task inside that specific stage.
