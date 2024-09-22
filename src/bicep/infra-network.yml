@@ -41,7 +41,7 @@ stages:
   - stage: InfraValidation
 
     variables: # Stage level variables can be defined to access the variables across all the jobs and task inside that specific stage.
-      - template: ./bicep/parameters/${{parameters.targetEnvironment}}.variables.yml
+      - template: ./parameters/${{parameters.targetEnvironment}}.variables.yml
 
     # Jobs run in parallel by default, this can be changed by adding a condition.
 
