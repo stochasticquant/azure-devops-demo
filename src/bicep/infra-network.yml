@@ -26,7 +26,7 @@ variables:
   # - ${{ if eq(parameters.targetEnvironment, 'production') }}:
   #   - group: TeamVars
 
-  - template: ./bicep/variables/global.variables.yml # Template for global variables
+  #- template: ./bicep/variables/global.variables.yml # Template for global variables
 
 # trigger:
 #   branches:
@@ -35,7 +35,7 @@ variables:
 
 trigger: none
 
-pool: ${{ global.variables.agentPool }} # Agent pool to use for the pipeline
+pool: ${{ variables.agentPool }} # Agent pool to use for the pipeline
 
 stages:
   - stage: InfraValidation
@@ -78,7 +78,7 @@ stages:
               location: "$(GlobalVariables.lib-var-location)"
               subscriptionId: "${{ variables.SubscriptionId }}" # Check!!
               templateLocation: "Linked artifact"
-              overrideParameters: "-agentPool ${{ global.variables.agentPool}}"
+              overrideParameters: "-agentPool ${{ variables.agentPool}}"
 
           # Details for a Powershell task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/azure-powershell?view=azure-devops
           # The below task converts output variables from the Bicep deployment to a key/value array which can be reused in subsequent tasks.
