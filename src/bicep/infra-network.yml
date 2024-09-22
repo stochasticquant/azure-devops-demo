@@ -62,20 +62,34 @@ stages:
 
           # Details for the Azure Resource Manager Deployment task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-resource-manager-template-deployment-v3?view=azure-pipelines
           # The below task allows for scoping and passthrough of output from the deployment task for reuse.
+
+          - task: AzureCLI@2
+            displayName: "Create Resource Group"
+            enabled: true
+            name: CreateResourceGroup
+            inputs:
+              azureSubscription: "$(lib-var-serviceConnection)" # Replace this with your service connection name
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                echo "Creating resource group: $(resourceGroupName)"
+                az group create --name "${{ variables.ResourceGroupName }}" --location $(lib-var-location) --tags MusaConsulting=${{ parameters.targetEnvironment }}
+              workingDirectory: $(System.DefaultWorkingDirectory)
+
           - task: AzureResourceManagerTemplateDeployment@3
             displayName: Deploy Bicep infra template
             enabled: true
-            name: DeployInfraBicep
+            name: DeployNetwork
             inputs:
               action: "Create Or Update Resource Group"
               azureResourceManagerConnection: "$(lib-var-serviceConnection)"
-              csmFile: "${{ variables.pipelineFolderRoot }}/main.infrastructure.bicep"
+              csmFile: "${{ variables.pipelineFolderRoot }}/main.network.infra.bicep"
               csmParametersFile: "${{ variables.pipelineFolderRoot }}/parameters/parameters.${{ parameters.targetEnvironment }}.json"
               deploymentMode: "Incremental"
               deploymentOutputs: "resourceGroupDeploymentOutputs"
               deploymentScope: "Resource Group"
               resourceGroupName: "${{ variables.ResourceGroupName }}"
-              location: "$(GlobalVariables.lib-var-location)"
+              location: "$(lib-var-location)"
               subscriptionId: "${{ variables.SubscriptionId }}" # Check!!
               templateLocation: "Linked artifact"
               overrideParameters: "-agentPool ${{ variables.agentPool }}"

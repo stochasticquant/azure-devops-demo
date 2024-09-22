@@ -1,7 +1,16 @@
 param vnetName string
 
+@description('Resource tags')
+var templateModuleTags = {
+  MusaConsulting: 'Project1'
+  CostCentre: 'MusaConsulting'
+  Status: 'Demo'
+  Owner: 'Charles Sambo'
+}
+
 resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
   name: vnetName
+  tags: templateModuleTags
   location: resourceGroup().location
   properties: {
     addressSpace: {

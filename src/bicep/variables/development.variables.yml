@@ -1,5 +1,5 @@
 variables:
   resourceGroupName: "musa01-vnet-d-rg"
-  SubscriptionId: "GlobalVariables.lib-var-d-subscriptionID"
+  SubscriptionId: "lib-var-d-subscriptionID"
   agentPool: "Default"
   pipelineFolderRoot: "src/bicep"
