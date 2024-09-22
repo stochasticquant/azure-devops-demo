@@ -68,7 +68,7 @@ stages:
             name: DeployInfraBicep
             inputs:
               action: "Create Or Update Resource Group"
-              azureResourceManagerConnection: "$(GlobalVariables.lib-var-serviceConnection)"
+              azureResourceManagerConnection: "$(lib-var-serviceConnection)"
               csmFile: "${{ variables.pipelineFolderRoot }}/main.infrastructure.bicep"
               csmParametersFile: "${{ variables.pipelineFolderRoot }}/parameters/parameters.${{ parameters.targetEnvironment }}.json"
               deploymentMode: "Incremental"
@@ -78,7 +78,7 @@ stages:
               location: "$(GlobalVariables.lib-var-location)"
               subscriptionId: "${{ variables.SubscriptionId }}" # Check!!
               templateLocation: "Linked artifact"
-              overrideParameters: "-agentPool ${{ variables.agentPool}}"
+              overrideParameters: "-agentPool ${{ variables.agentPool }}"
 
           # Details for a Powershell task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/azure-powershell?view=azure-devops
           # The below task converts output variables from the Bicep deployment to a key/value array which can be reused in subsequent tasks.
