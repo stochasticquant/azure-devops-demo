@@ -35,7 +35,7 @@ variables:
 
 trigger: none
 
-pool: ${{ variables.agentPool }} # Agent pool to use for the pipeline
+pool: "Default" # Agent pool to use for the pipeline
 
 stages:
   - stage: InfraValidation
