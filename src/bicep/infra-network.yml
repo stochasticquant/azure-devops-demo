@@ -41,7 +41,7 @@ stages:
   - stage: InfraValidation
 
     variables: # Stage level variables can be defined to access the variables across all the jobs and task inside that specific stage.
-      - template: ./parameters/${{parameters.targetEnvironment}}.variables.yml
+      - template: ./parameters/parameters.${{parameters.targetEnvironment}}.variables.yml
 
     # Jobs run in parallel by default, this can be changed by adding a condition.
 
@@ -57,8 +57,8 @@ stages:
         displayName: Infra Deployment Bicep
         # You can also make use of Azure Devops Environments to set approvals and security, https://learn.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops
         steps:
-          - checkout: self
-            path: ./s/self
+          # - checkout: self
+          #   path: ./s/self
 
           # Details for the Azure Resource Manager Deployment task: https://learn.microsoft.com/en-us/azure/devops/pipelines/tasks/reference/azure-resource-manager-template-deployment-v3?view=azure-pipelines
           # The below task allows for scoping and passthrough of output from the deployment task for reuse.
